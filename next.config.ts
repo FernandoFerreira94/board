@@ -5,3 +5,8 @@ const nextConfig: NextConfig = {
 };
 
 export default nextConfig;
+module.exports = {
+  images: {
+    domains: ["lh3.googleusercontent.com"], // adicione outros se precisar
+  },
+};
