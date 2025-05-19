@@ -1,10 +1,15 @@
 "use client";
 
-import React, { useCallback, useEffect, useState } from "react";
-import toast from "react-hot-toast";
-import { RiDeleteBin7Line, RiShareForwardFill } from "react-icons/ri";
+import React, { useEffect, useState } from "react";
+import { toast } from "react-toastify";
+import Link from "next/link";
+
+import { RiDeleteBin7Line, RiShareLine } from "react-icons/ri";
 import {
-  getDocs,
+  query,
+  orderBy,
+  where,
+  onSnapshot,
   collection,
   addDoc,
   doc,
@@ -12,74 +17,57 @@ import {
 } from "firebase/firestore";
 
 import TextArea from "@/components/textarea";
-import { db } from "@/firebaseConect/firebase";
+import { db } from "@/service/firebase";
 
 interface TaskProps {
   id: string;
-  checkbox: boolean;
+  public: boolean;
   text: string;
+  user: string;
+  created: Date;
 }
 
-export default function DashboardClient({ session }: any) {
+interface SessionProps {
+  session: {
+    user: {
+      email: string;
+    };
+  };
+}
+
+export default function DashboardClient({ session }: SessionProps) {
   const [textArea, setTextArea] = useState("");
   const [checkbox, setCheckbox] = useState(false);
   const [listTask, setListatask] = useState<TaskProps[]>([]);
-  const [hasLoaded, setHasLoaded] = useState(false);
   const email = session?.user?.email;
 
-  const getFirebase = useCallback(async () => {
-    const postRef = collection(db, "listTask");
-    try {
-      const snapshot = await getDocs(postRef);
-      const lista: TaskProps[] = [];
+  useEffect(() => {
+    async function getFireBaseTask() {
+      const taskRef = collection(db, "listTask");
+      const q = query(
+        taskRef,
+        orderBy("created", "desc"),
+        where("user", "==", email)
+      );
 
-      snapshot.forEach((doc) => {
-        lista.push({
-          id: doc.id,
-          text: doc.data().text,
-          checkbox: doc.data().checkbox,
+      onSnapshot(q, (snapshot) => {
+        const lista = [] as TaskProps[];
+
+        snapshot.forEach((doc) => {
+          lista.push({
+            id: doc.id,
+            text: doc.data().text,
+            created: doc.data().created,
+            user: doc.data().user,
+            public: doc.data().public,
+          });
         });
+        setListatask(lista);
       });
-
-      setListatask(lista);
-      saveTaskLocalStorage(email, lista);
-    } catch (error) {
-      console.error("Erro ao buscar tasks do Firebase", error);
     }
+
+    getFireBaseTask();
   }, [email]);
-
-  useEffect(() => {
-    getFirebase();
-  }, [hasLoaded, getFirebase]);
-
-  useEffect(() => {
-    if (!email) return;
-
-    getFirebase();
-    const saveTask = getTaskLocalStortage(email);
-    if (saveTask.length > 0) {
-      setListatask(saveTask);
-    }
-    setHasLoaded(true);
-  }, [email, getFirebase]);
-
-  function saveTaskLocalStorage(email: string, list: TaskProps[]) {
-    localStorage.setItem(email, JSON.stringify(list));
-  }
-
-  function getTaskLocalStortage(email: string): TaskProps[] {
-    const data = localStorage.getItem(email);
-    if (!data) {
-      return [];
-    }
-
-    try {
-      return JSON.parse(data);
-    } catch (error) {
-      console.error("Error ao ler localStorage", error);
-      return [];
-    }
-  }
 
   async function handleAddTask(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -97,19 +85,14 @@ export default function DashboardClient({ session }: any) {
 
     await addDoc(collection(db, "listTask"), {
       text: textArea,
-      checkbox,
+      public: checkbox,
+      user: email,
+      created: new Date(),
     })
-      .then((docRef) => {
-        const newTask: TaskProps = {
-          id: docRef.id,
-          text: textArea,
-          checkbox,
-        };
-        console.log(docRef.id);
-        setListatask((prev) => [...prev, newTask]);
+      .then(() => {
+        toast.success("Task add with success!");
         setTextArea("");
         setCheckbox(false);
-        toast.success("Task save success");
       })
       .catch((error) => {
         toast.error("Error save your task :(");
@@ -121,18 +104,24 @@ export default function DashboardClient({ session }: any) {
     const docRef = doc(db, "listTask", id);
     await deleteDoc(docRef)
       .then(() => {
-        toast.success("task deleted successfully");
+        toast.info("task deleted successfully");
       })
       .catch((error) => {
         toast.error("Oops can't delete the task");
         console.error(error);
       });
-    getFirebase();
+  }
+
+  async function handleShare(id: string) {
+    await navigator.clipboard.writeText(
+      `${process.env.NEXT_PUBLIC_URL}/task${id}`
+    );
+    alert("URL compiada");
   }
 
   return (
     <div className="bg-[#0f0f0f] w-full flex items-center flex-col heigth">
-      <main className="w-full flex flex-col items-center border">
+      <main className="w-full flex flex-col items-center">
         <section className="w-7/10 max-sm:w-9/10 mt-20">
           <form
             onSubmit={handleAddTask}
@@ -186,22 +175,28 @@ export default function DashboardClient({ session }: any) {
                 key={index}
                 className="w-7/10 mt-7 flex justify-between items-center gap-5 max-sm:w-9/10 rounded-md p-3 border-2 transition duration-200 hover:border-blue-500"
               >
-                <div className="flex flex-col gap-2">
-                  {task.checkbox && (
+                <article className="flex flex-col gap-2 w-full">
+                  {task.public && (
                     <div className="flex gap-3 items-center">
                       <span className="bg-blue-500 text-white py-1.5 px-5 rounded-md text-sm cursor-pointer transition duration-500 hover:scale-110">
                         Public
                       </span>
-                      <RiShareForwardFill
-                        size={30}
+                      <button
+                        onClick={() => handleShare(task.id)}
                         className="text-blue-500 cursor-pointer transition duration-500 hover:scale-120"
-                      />
+                      >
+                        <RiShareLine size={30} />
+                      </button>
                     </div>
                   )}
-                  <div className="flex justify-between items-center">
-                    <span className="text-xl">{task.text}</span>
-                  </div>
-                </div>
+                  <Link href={`/task/${task.id}`} className="w-full">
+                    <div className="flex justify-between items-center">
+                      <p className="text-xl whitespace-pre w-full">
+                        {task.text}
+                      </p>
+                    </div>
+                  </Link>
+                </article>
                 <RiDeleteBin7Line
                   size={35}
                   color="red"

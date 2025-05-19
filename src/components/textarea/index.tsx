@@ -7,7 +7,7 @@ export default function TextArea({ ...rest }: HTMLProps<HTMLTextAreaElement>) {
       id="task"
       rows={7}
       {...rest}
-      className="bg-white w-full border-5 border-transparent rounded-xl mt-5 p-4 text-xl text-black hover:border-blue-500  transition duration-200"
+      className="bg-white w-full border-3  rounded-xl mt-5 p-4 text-xl text-black hover:border-blue-500  transition duration-200 disabled:cursor-not-allowed disabled:border-gray-400"
     />
   );
 }

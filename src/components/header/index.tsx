@@ -6,7 +6,7 @@ import Link from "next/link";
 import { FaRegUser } from "react-icons/fa";
 import { MdOutlineDashboardCustomize } from "react-icons/md";
 import { AiOutlineLoading3Quarters } from "react-icons/ai";
-import toast from "react-hot-toast";
+import { toast } from "react-toastify";
 
 export default function Header() {
   const { data: session, status } = useSession();
@@ -23,12 +23,10 @@ export default function Header() {
 
   useEffect(() => {
     if (status === "authenticated") {
-      toast.success(`Welcome ${session?.user?.name || "Guest"}`, {
-        id: "auth-success",
-      });
+      toast(`Welcome ${session?.user?.name || "Guest"}`);
     }
     if (status === "unauthenticated") {
-      toast.error("See you later", { id: "auth-error" });
+      toast("See you later");
     }
   }, [status, session?.user?.name]);
 
