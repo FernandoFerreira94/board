@@ -8,7 +8,6 @@ import {
   collection,
   query,
   where,
-  getDocs,
   deleteDoc,
   onSnapshot,
 } from "firebase/firestore";
@@ -136,10 +135,11 @@ export default function TaskClient({ id }: ParamsProps) {
               </p>
             </article>
             <section className="w-full my-8">
-              <h2 className="text-xl ">Deixar comentarios</h2>
+              <h2 className="text-xl ">Leave comments</h2>
               <form onSubmit={handleComment} className="flex flex-col gap-6">
                 <TextArea
-                  placeholder="Digite seu comentarios"
+                  className=""
+                  placeholder="Type your task"
                   disabled={!session?.user}
                   value={textArea}
                   onChange={(event: ChangeEvent<HTMLTextAreaElement>) => {
@@ -159,7 +159,7 @@ export default function TaskClient({ id }: ParamsProps) {
             <section className="w-full mt-8 flex flex-col gap-4">
               <h1 className="text-xl ">Every comments</h1>
               {comments.length === 0 && (
-                <p className="font-bold mt-8 text-lg">Nenhum comentario</p>
+                <p className="font-bold mt-8 text-lg">No comments</p>
               )}
 
               {comments.map((item) => (
@@ -168,7 +168,7 @@ export default function TaskClient({ id }: ParamsProps) {
                   className="border w-full p-3 rounded-xl flex flex-col gap-3"
                 >
                   <div className="flex gap-3 items-center">
-                    <span className="bg-gray-300 px-3 py-1 rounded-xl text-sm">
+                    <span className="bg-gray-300 px-3 py-1 rounded-xl text-sm italic">
                       {item.name}
                     </span>
 

@@ -178,9 +178,11 @@ export default function DashboardClient({ session }: SessionProps) {
                 <article className="flex flex-col gap-2 w-full">
                   {task.public && (
                     <div className="flex gap-3 items-center">
-                      <span className="bg-blue-500 text-white py-1.5 px-5 rounded-md text-sm cursor-pointer transition duration-500 hover:scale-110">
-                        Public
-                      </span>
+                      <Link href={`/task/${task.id}`}>
+                        <span className="bg-blue-500 text-white py-1.5 px-5 rounded-md text-sm cursor-pointer transition duration-500 hover:scale-110">
+                          Public
+                        </span>
+                      </Link>
                       <button
                         onClick={() => handleShare(task.id)}
                         className="text-blue-500 cursor-pointer transition duration-500 hover:scale-120"

@@ -4,6 +4,10 @@
   font-family: "Roboto", sans-serif;
 }
 
+.geitsMono {
+  font-family: "geitsMono";
+}
+
 .heigth {
   height: calc(100dvh - 80px);
 }
