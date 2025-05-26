@@ -1,12 +1,23 @@
-import TaskClient from ".";
+"use client";
+import { useEffect, useState } from "react";
+import TaskClient from "./TaskClient";
 
-interface ParamsProps {
-  params: {
-    id: string;
-  };
+interface PageProps {
+  params: Promise<{ id: string }>;
 }
 
-export default function TaskPage({ params }: ParamsProps) {
-  // Aqui você pode buscar dados no Firestore ou apenas mostrar o ID
-  return <TaskClient id={params.id} />;
+export default function Page({ params }: PageProps) {
+  const [resolvedParams, setResolvedParams] = useState<{ id: string } | null>(
+    null
+  );
+
+  useEffect(() => {
+    params.then(setResolvedParams);
+  }, [params]);
+
+  if (!resolvedParams) {
+    return <p>Carregando...</p>;
+  }
+
+  return <TaskClient id={resolvedParams.id} />;
 }

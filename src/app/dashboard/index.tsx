@@ -1,5 +1,6 @@
 "use client";
 
+import { Session } from "next-auth";
 import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import Link from "next/link";
@@ -28,11 +29,7 @@ interface TaskProps {
 }
 
 interface SessionProps {
-  session: {
-    user: {
-      email: string;
-    };
-  };
+  session: Session;
 }
 
 export default function DashboardClient({ session }: SessionProps) {

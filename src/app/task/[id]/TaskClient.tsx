@@ -27,7 +27,7 @@ interface TaskProps {
   public: boolean;
   user: string;
 }
-interface ParamsProps {
+interface TaskClientProps {
   id: string;
 }
 
@@ -39,7 +39,7 @@ interface CommentsProps {
   taskId: string;
   id: string;
 }
-export default function TaskClient({ id }: ParamsProps) {
+export default function TaskClient({ id }: TaskClientProps) {
   const { data: session } = useSession();
   const [task, setTask] = useState<TaskProps | null>(null);
   const [textArea, setTextArea] = useState("");
